@@ -133,6 +133,7 @@ public class OrderController {
                 .productName(item.getProduct() != null ? item.getProduct().getName() : null)
                 .isReviewed(item.getIsReviewed() != null ? item.getIsReviewed() : false)
                 .thumbnail(determineThumbnailUrl(item))
+                .userId(item.getOrder() != null && item.getOrder().getCustomer() != null ? item.getOrder().getCustomer().getId() : null)
                 .build();
     }
 
