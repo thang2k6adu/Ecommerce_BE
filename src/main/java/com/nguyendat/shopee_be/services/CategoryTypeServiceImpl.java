@@ -5,7 +5,6 @@ import com.nguyendat.shopee_be.dto.CategoryTypeRequest;
 import com.nguyendat.shopee_be.exceptions.ResourceNotFoundEx;
 import com.nguyendat.shopee_be.repositories.CategoryRepository;
 import com.nguyendat.shopee_be.repositories.CategoryTypeRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,10 +37,7 @@ public class CategoryTypeServiceImpl implements CategoryTypeService {
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "categoryType", key = "#request.id"),
-            @CacheEvict(value = "categoryTypeList", allEntries = true)
-    })
+    @CacheEvict(value = "categoryTypeList", allEntries = true)
     public CategoryType create(CategoryTypeRequest request) {
         var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundEx("Category not found"));
