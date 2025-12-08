@@ -69,6 +69,7 @@ public class WebSecurityConfig {
             .requestMatchers("/api/health").permitAll()
             .requestMatchers("/api/reviews/**").permitAll()
             .requestMatchers("/api/orders/unreviewed").permitAll()
+            .requestMatchers("/api/user/profile").permitAll()
             .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/**").hasRole("ADMIN")
             .anyRequest().authenticated())
