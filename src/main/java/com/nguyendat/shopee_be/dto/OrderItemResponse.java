@@ -23,4 +23,6 @@ public class OrderItemResponse {
     private String productName;
     // Indicate whether the order item has been reviewed by the customer
     private Boolean isReviewed;
+    // Product thumbnail URL (primary image) to show product image in unreviewed items
+    private String thumbnail;
 }

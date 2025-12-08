@@ -132,7 +132,21 @@ public class OrderController {
                 .productVariantId(item.getProductVariant() != null ? item.getProductVariant().getId() : null)
                 .productName(item.getProduct() != null ? item.getProduct().getName() : null)
                 .isReviewed(item.getIsReviewed() != null ? item.getIsReviewed() : false)
+                .thumbnail(determineThumbnailUrl(item))
                 .build();
+    }
+
+    // choose product thumbnail: primary resource URL if present, otherwise first resource URL, otherwise null
+    private String determineThumbnailUrl(OrderItem item) {
+        if (item == null || item.getProduct() == null || item.getProduct().getResources() == null || item.getProduct().getResources().isEmpty()) {
+            return null;
+        }
+
+        return item.getProduct().getResources().stream()
+                .filter(r -> r.getIsPrimary() != null && r.getIsPrimary())
+                .findFirst()
+                .map(r -> r.getUrl())
+                .orElse(item.getProduct().getResources().get(0).getUrl());
     }
 
     // Helper to build full name from User entity (handles nulls)
