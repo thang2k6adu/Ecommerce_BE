@@ -105,24 +105,36 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        List<OrderItem> orderItems = request.getOrderItems().stream().map(itemReq -> {
-            OrderItem item = new OrderItem();
-            item.setOrder(savedOrder);
-            item.setQuantity(itemReq.getQuantity());
-            item.setUnitPrice(itemReq.getUnitPrice());
-            item.setTotalPrice(itemReq.getTotalPrice());
+    // Validate stock and prepare OrderItem entities
+    List<OrderItem> orderItems = request.getOrderItems().stream().map(itemReq -> {
+        OrderItem item = new OrderItem();
+        item.setOrder(savedOrder);
+        item.setQuantity(itemReq.getQuantity());
+        item.setUnitPrice(itemReq.getUnitPrice());
+        item.setTotalPrice(itemReq.getTotalPrice());
 
-            Product product = productRepository.findById(itemReq.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundEx("Product not found with id: " + itemReq.getProductId()));
+        Product product = productRepository.findById(itemReq.getProductId())
+            .orElseThrow(() -> new ResourceNotFoundEx("Product not found with id: " + itemReq.getProductId()));
 
-            ProductVariant variant = productVariantRepository.findById(itemReq.getProductVariantId())
-                    .orElseThrow(() -> new ResourceNotFoundEx("Product variant not found with id: " + itemReq.getProductVariantId()));
+        ProductVariant variant = productVariantRepository.findById(itemReq.getProductVariantId())
+            .orElseThrow(() -> new ResourceNotFoundEx("Product variant not found with id: " + itemReq.getProductVariantId()));
 
-            item.setProduct(product);
-            item.setProductVariant(variant);
+        // Check stock availability
+        int requested = itemReq.getQuantity();
+        Integer available = variant.getStockQuantity() != null ? variant.getStockQuantity() : 0;
+        if (available < requested) {
+        throw new IllegalArgumentException("Insufficient stock for variant " + variant.getId() + ": requested=" + requested + ", available=" + available);
+        }
 
-            return orderItemRepository.save(item);
-        }).collect(Collectors.toList());
+        // Deduct stock and persist the variant
+        variant.setStockQuantity(available - requested);
+        productVariantRepository.save(variant);
+
+        item.setProduct(product);
+        item.setProductVariant(variant);
+
+        return orderItemRepository.save(item);
+    }).collect(Collectors.toList());
 
         savedOrder.setOrderItems(orderItems);
         log.info("🔥 INFO: Order created with ID: " + savedOrder.getId());
