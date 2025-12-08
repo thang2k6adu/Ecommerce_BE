@@ -7,7 +7,6 @@ import com.nguyendat.shopee_be.repositories.CategoryRepository;
 import com.nguyendat.shopee_be.repositories.CategoryTypeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
 import java.util.List;
@@ -24,13 +23,11 @@ public class CategoryTypeServiceImpl implements CategoryTypeService {
     }
 
     @Override
-    @Cacheable(value = "categoryTypeList")
     public List<CategoryType> findAll() {
         return repository.findAll();
     }
 
     @Override
-    @Cacheable(value = "categoryType", key = "#id")
     public CategoryType findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundEx("CategoryType not found with id: " + id));
