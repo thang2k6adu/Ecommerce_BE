@@ -25,4 +25,6 @@ public class OrderItemResponse {
     private Boolean isReviewed;
     // Product thumbnail URL (primary image) to show product image in unreviewed items
     private String thumbnail;
+    // Id of the user (customer) who owns the order that contains this item
+    private UUID userId;
 }
