@@ -44,7 +44,7 @@ public class WebSecurityConfig {
     private JWTTokenHelper jwtTokenHelper;
 
     @Value("${cors.allowed-origins:http://localhost:5173,http://localhost:3000,https://ecommerce-fe-pink-one.vercel.app}")
-    private String corsAllowedOrigins; // comma separated
+    private String corsAllowedOrigins;
 
     private static final String[] publicApis = {
             "/api/auth/**",
@@ -57,19 +57,21 @@ public class WebSecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products", "/api/category").permitAll()
-                        .requestMatchers("/api/orders/me").permitAll()
-                        .requestMatchers("/oauth2/success").permitAll()
-                        .requestMatchers("/api/upload/**", "/uploads/**").permitAll()
-                        .requestMatchers("/return").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/api/dashboard/kpi").permitAll()
-                        .requestMatchers("/api/health").permitAll()
-                        .requestMatchers("/api/reviews/**").permitAll()
-                        .requestMatchers("/api/orders/unreviewed").permitAll()
-                        .anyRequest().authenticated())
+        .authorizeHttpRequests((authorize) -> authorize
+            .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/products", "/api/category").permitAll()
+            .requestMatchers("/api/orders/me").permitAll()
+            .requestMatchers("/oauth2/success").permitAll()
+            .requestMatchers("/api/upload/**", "/uploads/**").permitAll()
+            .requestMatchers("/return").permitAll()
+            .requestMatchers("/ws/**").permitAll()
+            .requestMatchers("/api/dashboard/kpi").permitAll()
+            .requestMatchers("/api/health").permitAll()
+            .requestMatchers("/api/reviews/**").permitAll()
+            .requestMatchers("/api/orders/unreviewed").permitAll()
+            .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/**").hasRole("ADMIN")
+            .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(user -> user.userService(oAuth2Service))
                         .successHandler(oAuth2SuccessHandler))
@@ -93,22 +95,11 @@ public class WebSecurityConfig {
                             response.getWriter().write(json);
                             response.getWriter().flush();
                         }))
-                // .successHandler((request, response, authentication) -> {
-                // // Sinh JWT token cho user
-                // String token = jwtTokenHelper.generateToken(authentication.getName());
-
-                // // Redirect về React app kèm token
-                // response.sendRedirect("http://localhost:5173/v1/oauth2/callback?token=" +
-                // token);
-                // })) // .exceptionHandling((exception)->
-                // exception.authenticationEntryPoint(new
-                // RESTAuthenticationEntryPoint()))
                 .addFilterBefore(new JWTAuthenticationFilter(jwtTokenHelper, userDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    // bỏ qua không cần để req auth đi qua security chain
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(publicApis);
@@ -124,17 +115,15 @@ public class WebSecurityConfig {
 
     }
 
-    // PasswordEncoder là interface do Spring Security cung cấp, định nghĩa các
-    // phương thức dùng để mã hóa và kiểm tra mật khẩu:
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder(); // Tạo bộ mã hóa đa năng, mặc định là BCrypt
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder(); 
     }
 
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         var cors = new org.springframework.web.cors.CorsConfiguration();
-        // load allowed origins from property (comma separated)
         for (String origin : corsAllowedOrigins.split(",")) {
             String trimmed = origin.trim();
             if (!trimmed.isEmpty()) {
@@ -143,7 +132,6 @@ public class WebSecurityConfig {
         }
         cors.addAllowedHeader("*");
         cors.addAllowedMethod("*");
-        // cors.setAllowCredentials(true); // nếu FE dùng cookies, credentials
 
         var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cors);
