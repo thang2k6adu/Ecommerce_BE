@@ -122,6 +122,10 @@ public class OrderController {
     private OrderItemResponse toOrderItemResponse(OrderItem item) {
         UUID productId = null;
         if (item.getProduct() != null) productId = item.getProduct().getId();
+        UUID userId = null;
+        if (item.getOrder() != null && item.getOrder().getCustomer() != null) {
+            userId = item.getOrder().getCustomer().getId();
+        }
 
         return OrderItemResponse.builder()
                 .id(item.getId())
@@ -133,6 +137,7 @@ public class OrderController {
                 .productName(item.getProduct() != null ? item.getProduct().getName() : null)
                 .isReviewed(item.getIsReviewed() != null ? item.getIsReviewed() : false)
                 .thumbnail(determineThumbnailUrl(item))
+                .userId(userId)
                 .build();
     }
 
