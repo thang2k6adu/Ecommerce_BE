@@ -9,7 +9,6 @@ import com.nguyendat.shopee_be.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +24,7 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Cacheable(value = "category:id", key = "#categoryId")
     public Category getCategory(UUID categoryId){
-        // logger.info("CategoryService getCategory: categoryId={}", categoryId);
         Optional<Category> category = categoryRepository.findById(categoryId);
         return category.orElse(null);
     }
@@ -64,7 +61,6 @@ public class CategoryService {
         }).collect(Collectors.toList());
     }
 
-    @Cacheable(value = "category:all")
     public List<Category> getAllCategory() {
         return categoryRepository.findAll();
     }
