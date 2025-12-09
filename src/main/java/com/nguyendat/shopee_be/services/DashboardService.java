@@ -62,7 +62,7 @@ public class DashboardService {
         payload.put("topCustomers", getTopCustomers(5));
         
         socketHandler.sendEvent("KPI_UPDATE", payload);
-        log.info("📊 Pushed KPI update");
+        log.info(" Pushed KPI update");
     }
 
 
@@ -75,7 +75,7 @@ public class DashboardService {
         payload.put("total", total);
         
         socketHandler.sendEvent("NEW_ORDER", payload);
-        log.info("🛒 Pushed NEW_ORDER: {}", orderId);
+        log.info(" Pushed NEW_ORDER: {}", orderId);
         
         // Trigger KPI update (đơn chưa xử lý tăng)
         pushKpiUpdate();
@@ -89,7 +89,7 @@ public class DashboardService {
         payload.put("newStatus", newStatus);
         
         socketHandler.sendEvent("ORDER_STATUS_CHANGED", payload);
-        log.info("📦 Pushed ORDER_STATUS_CHANGED: {} -> {}", oldStatus, newStatus);
+        log.info(" Pushed ORDER_STATUS_CHANGED: {} -> {}", oldStatus, newStatus);
         
         // NẾU CHUYỂN SANG PAID → UPDATE REVENUE
         if ("PAID".equals(newStatus)) {
@@ -106,7 +106,7 @@ public class DashboardService {
         payload.put("todayRevenue", getTodayRevenue()); // Tổng tất cả PAID
         
         socketHandler.sendEvent("REVENUE_UPDATED", payload);
-        log.info("💰 Pushed REVENUE_UPDATED");
+        log.info(" Pushed REVENUE_UPDATED");
     }
 
     // Push hourly revenue (cho line chart - chỉ đơn PAID hôm nay)
@@ -147,7 +147,7 @@ public class DashboardService {
         log.debug("HOURLY_REVENUE payload size: {}", chartData.size());
 
         socketHandler.sendEvent("HOURLY_REVENUE", chartData);
-        log.info("📈 Pushed HOURLY_REVENUE");
+        log.info(" Pushed HOURLY_REVENUE");
     }
 
     // Top products (by quantity sold)
@@ -225,7 +225,7 @@ public class DashboardService {
         }
         
         socketHandler.sendEvent("ORDER_STATUS_DISTRIBUTION", distribution);
-        log.info("📊 Pushed ORDER_STATUS_DISTRIBUTION");
+        log.info(" Pushed ORDER_STATUS_DISTRIBUTION");
     }
 
 
@@ -235,7 +235,7 @@ public class DashboardService {
         int clients = socketHandler.getConnectedClients();
 
         if (clients == 0) {
-            // log.debug("⏳ No active dashboard clients → skip push");
+            // log.debug(" No active dashboard clients → skip push");
             return;
         }
 
@@ -253,10 +253,10 @@ public class DashboardService {
             socketHandler.sendEvent("TOP_PRODUCTS", topProducts);
             socketHandler.sendEvent("TOP_CUSTOMERS", topCustomers);
 
-            log.info("📡 Dashboard data pushed to {} clients", clients);
+            log.info(" Dashboard data pushed to {} clients", clients);
 
         } catch (Exception e) {
-            log.error("❌ Failed auto push dashboard: {}", e.getMessage());
+            log.error(" Failed auto push dashboard: {}", e.getMessage());
         }
     }
 }
