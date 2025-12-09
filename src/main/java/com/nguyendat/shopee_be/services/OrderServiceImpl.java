@@ -88,8 +88,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order create(OrderRequest request) {
-        log.info("🔥🔥🔥 ============ CREATE METHOD CALLED ============");
-        log.info("🔥🔥🔥 Customer ID: " + request.getCustomerId());
+        log.info(" CREATE METHOD CALLED");
+        log.info(" Customer ID: " + request.getCustomerId());
         User customer = userRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new ResourceNotFoundEx("User not found with id: " + request.getCustomerId()));
 
@@ -125,11 +125,11 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
 
         savedOrder.setOrderItems(orderItems);
-        log.info("🔥 INFO: Order created with ID: " + savedOrder.getId());
+        log.info(" INFO: Order created with ID: " + savedOrder.getId());
 
         Order finalOrder = orderRepository.save(savedOrder);
-        log.info("🔥 DEBUG: Order created with ID: " + finalOrder.getId());
-        log.info("🔥 DEBUG: Total amount: " + finalOrder.getTotalAmount());
+        log.info(" DEBUG: Order created with ID: " + finalOrder.getId());
+        log.info(" DEBUG: Total amount: " + finalOrder.getTotalAmount());
 
         // GỬI DASHBOARD EVENT: NEW_ORDER
         try {
@@ -142,7 +142,7 @@ public class OrderServiceImpl implements OrderService {
                 finalOrder.getTotalAmount().doubleValue()
             );
         } catch (Exception e) {
-            System.err.println("❌ Failed to push dashboard NEW_ORDER event: " + e.getMessage());
+            System.err.println(" Failed to push dashboard NEW_ORDER event: " + e.getMessage());
         }
 
         return finalOrder;
@@ -228,7 +228,7 @@ public class OrderServiceImpl implements OrderService {
                     dashboardService.pushRevenueUpdate();
                 }
             } catch (Exception e) {
-                System.err.println("❌ Failed to push dashboard PAYMENT event: " + e.getMessage());
+                System.err.println(" Failed to push dashboard PAYMENT event: " + e.getMessage());
             }
 
             return "00".equals(rspCode);
@@ -238,20 +238,20 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateStatus(UUID orderId, OrderStatus newStatus, String changedBy) {
-        // 1️⃣ Lấy đơn hàng
+        // 1️Lấy đơn hàng
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundEx("Order not found"));
 
         OrderStatus oldStatus = order.getStatus();
 
-        // 2️⃣ Kiểm tra chuyển trạng thái hợp lệ
+        // 2️Kiểm tra chuyển trạng thái hợp lệ
         if (!isValidTransition(oldStatus, newStatus)) {
             throw new IllegalArgumentException(
                     "Không thể chuyển từ trạng thái " + oldStatus + " sang " + newStatus
             );
         }
 
-        // 3️⃣ Nếu hủy hoặc hoàn trả → trả kho
+        // 3️Nếu hủy hoặc hoàn trả → trả kho
         if (newStatus == OrderStatus.CANCELED || newStatus == OrderStatus.REFUND) {
             for (OrderItem item : order.getOrderItems()) {
                 ProductVariant variant = item.getProductVariant();
@@ -260,7 +260,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // 4️⃣ Lưu lịch sử trạng thái
+        // 4️Lưu lịch sử trạng thái
         OrderStatusHistory history = new OrderStatusHistory();
         history.setOrder(order);
         history.setOldStatus(oldStatus);
@@ -268,12 +268,12 @@ public class OrderServiceImpl implements OrderService {
         history.setChangedBy(changedBy);
         statusHistoryRepository.save(history);
 
-        // 5️⃣ Cập nhật trạng thái đơn hàng
+        // 5️Cập nhật trạng thái đơn hàng
         order.setStatus(newStatus);
         order.setUpdatedAt(new Date());
         Order savedOrder = orderRepository.save(order);
 
-        // 6️⃣  Gửi thông báo NOTIFICATION qua NotificationSocketHandler
+        // 6️ Gửi thông báo NOTIFICATION qua NotificationSocketHandler
         try {
             Map<String, Object> payload = new HashMap<>();
             payload.put("type", "ORDER_STATUS");
@@ -285,10 +285,10 @@ public class OrderServiceImpl implements OrderService {
 
             notificationSocketHandler.broadcastNotification(payload);
         } catch (Exception e) {
-            System.err.println("❌ Failed to broadcast WebSocket notification: " + e.getMessage());
+            System.err.println(" Failed to broadcast WebSocket notification: " + e.getMessage());
         }
 
-        // 7️⃣  GỬI DASHBOARD EVENT: ORDER_STATUS_CHANGED
+        // 7️ GỬI DASHBOARD EVENT: ORDER_STATUS_CHANGED
         try {
             dashboardService.pushOrderStatusChanged(
                 orderId.toString(),
@@ -301,7 +301,7 @@ public class OrderServiceImpl implements OrderService {
                 dashboardService.pushRevenueUpdate();
             }
         } catch (Exception e) {
-            System.err.println("❌ Failed to push dashboard ORDER_STATUS_CHANGED event: " + e.getMessage());
+            System.err.println(" Failed to push dashboard ORDER_STATUS_CHANGED event: " + e.getMessage());
         }
 
         return savedOrder;
@@ -329,7 +329,7 @@ public class OrderServiceImpl implements OrderService {
 
             notificationSocketHandler.broadcastNotification(payload);
         } catch (Exception e) {
-            System.err.println("❌ Failed to broadcast payment status WebSocket notification: " + e.getMessage());
+            System.err.println(" Failed to broadcast payment status WebSocket notification: " + e.getMessage());
         }
 
         //  GỬI DASHBOARD EVENT nếu thanh toán thành công
@@ -339,7 +339,7 @@ public class OrderServiceImpl implements OrderService {
                 dashboardService.pushRevenueUpdate();
             }
         } catch (Exception e) {
-            System.err.println("❌ Failed to push dashboard PAYMENT event: " + e.getMessage());
+            System.err.println(" Failed to push dashboard PAYMENT event: " + e.getMessage());
         }
 
         return saved;

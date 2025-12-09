@@ -37,7 +37,7 @@ public class NotificationSocketHandler extends TextWebSocketHandler {
     public void broadcastNotification(Object payload) {
         try {
             String json = objectMapper.writeValueAsString(payload);
-            System.out.println("🔔 Broadcasting notification to sessions=" + sessions.size() + " payload=" + json);
+            System.out.println("Broadcasting notification to sessions=" + sessions.size() + " payload=" + json);
             sessions.values().forEach(ws -> {
                 try {
                     if (ws.isOpen()) {

@@ -48,15 +48,15 @@ public class DashboardSocketHandler extends TextWebSocketHandler {
         //     try {
         //         Thread.sleep(500); // Delay để client sẵn sàng nhận
                 
-        //         log.info("📊 Sending initial charts data to client {}", session.getId());
+        //         log.info(" Sending initial charts data to client {}", session.getId());
                 
         //         dashboardService.pushKpiUpdate();
         //         dashboardService.pushHourlyRevenue();
         //         dashboardService.pushOrderStatusDistribution();
                 
-        //         log.info("✅ Initial charts data sent to client {}", session.getId());
+        //         log.info(" Initial charts data sent to client {}", session.getId());
         //     } catch (Exception e) {
-        //         log.error("❌ Failed to send initial charts data: {}", e.getMessage());
+        //         log.error(" Failed to send initial charts data: {}", e.getMessage());
         //     }
         // });
     }
@@ -64,13 +64,13 @@ public class DashboardSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         sessions.remove(session);
-        log.info("❌ Dashboard client disconnected: {} | Remaining: {}", 
+        log.info(" Dashboard client disconnected: {} | Remaining: {}", 
                  session.getId(), sessions.size());
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        log.error("🔥 WebSocket error for session {}: {}", 
+        log.error(" WebSocket error for session {}: {}", 
                   session.getId(), exception.getMessage());
         sessions.remove(session);
     }
@@ -81,7 +81,7 @@ public class DashboardSocketHandler extends TextWebSocketHandler {
         try {
             json = mapper.writeValueAsString(event);
         } catch (IOException e) {
-            log.error("❌ Failed to serialize event: {}", e.getMessage());
+            log.error(" Failed to serialize event: {}", e.getMessage());
             return;
         }
 
@@ -94,13 +94,13 @@ public class DashboardSocketHandler extends TextWebSocketHandler {
                 session.sendMessage(new TextMessage(json));
                 return false; // Keep session
             } catch (IOException e) {
-                log.error("❌ Failed to send to session {}: {}", 
+                log.error(" Failed to send to session {}: {}", 
                           session.getId(), e.getMessage());
                 return true; // Remove failed session
             }
         });
         
-        log.debug("📡 Broadcasted {} to {} sessions", event.getType(), sessions.size());
+        log.debug(" Broadcasted {} to {} sessions", event.getType(), sessions.size());
     }
 
     //  Send to single session
@@ -109,7 +109,7 @@ public class DashboardSocketHandler extends TextWebSocketHandler {
             String json = mapper.writeValueAsString(event);
             session.sendMessage(new TextMessage(json));
         } catch (IOException e) {
-            log.error("❌ Failed to send to session {}: {}", 
+            log.error(" Failed to send to session {}: {}", 
                       session.getId(), e.getMessage());
         }
     }
