@@ -34,7 +34,7 @@ public class CategoryTypeServiceImpl implements CategoryTypeService {
     }
 
     @Override
-    @CacheEvict(value = "categoryTypeList", allEntries = true)
+            @CacheEvict(value = "categoryTypeList", allEntries = true)
     public CategoryType create(CategoryTypeRequest request) {
         var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundEx("Category not found"));
